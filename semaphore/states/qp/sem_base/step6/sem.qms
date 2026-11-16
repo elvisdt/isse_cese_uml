@@ -10,8 +10,8 @@
  </group>
  <group name="windows">
   <item id=".::main.cpp">0,0,603,538</item>
-  <item id="AOs::Traffic::SM">0,0,906,453,*</item>
-  <item id="AOs::Button::SM">264,143,642,321</item>
+  <item id="AOs::Traffic::SM">0,11,836,550</item>
+  <item id="AOs::Button::SM">0,0,836,550,*</item>
  </group>
  <group name="search">
   <item name="options">2032128</item>

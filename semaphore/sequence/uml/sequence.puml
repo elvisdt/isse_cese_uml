@@ -1,11 +1,229 @@
-@startuml
-participant A
-participant B
-participant C
- 
-database aaa
-A -> B
-B -->> C
-C -->> A
+' ============================================================
+' Semáforo - Diagrama de secuencia, construcción paso a paso
+' Un solo archivo con 9 pasos. Cada @startuml genera un diagrama.
+' Verde = participante o mensaje NUEVO en ese paso.
+' El texto fuera de @startuml/@enduml es ignorado por PlantUML.
+' Flechas: ->  llamada síncrona,  ->>  evento asíncrono,
+'          --> retorno (línea punteada).
+' ============================================================
+
+
+
+' PASO 1 - Participante dummy
+' Partimos de una única línea de vida que todavía no sabe con quién
+' colaborar. Solo se envía un mensaje a sí misma.
+@startuml paso1_dummy
+title Paso 1 - Participante dummy
+participant Dummy #palegreen
+Dummy -[#2E8B57]> Dummy : hace algo
 @enduml
 
+
+' PASO 2 - El dummy se convierte en Traffic
+' Aparece Main, que inicia el sistema con init(). El dummy pasa a ser
+' Traffic, la máquina de estados del semáforo.
+@startuml paso2_traffic
+title Paso 2 - El dummy se convierte en Traffic
+participant Main #palegreen
+participant Traffic #palegreen
+Main -[#2E8B57]> Traffic : init()
+@enduml
+
+
+' PASO 3 - Traffic usa el Timer y el LED rojo
+' Al iniciar, Traffic arma el Timer (armX) y enciende LedR.
+' Son llamadas síncronas (flecha llena).
+@startuml paso3_timer_led
+title Paso 3 - Traffic usa el Timer y el LED rojo
+participant Main
+participant Traffic
+participant Timer #palegreen
+participant LedR #FFC9C9
+Main -> Traffic : init()
+Traffic -[#2E8B57]> Timer : armX(COLOR_R_TIME)
+Traffic -[#2E8B57]> LedR : ledOn()
+@enduml
+
+
+' PASO 4 - Primer ciclo: R pasa a YtoG
+' El Timer vence y envía TOUT (evento asíncrono, flecha abierta).
+' Traffic apaga el rojo, enciende el amarillo y rearma el Timer.
+@startuml paso4_ciclo
+title Paso 4 - Primer ciclo: R pasa a YtoG
+participant Main
+participant Traffic
+participant Timer
+participant LedR #FFC9C9
+participant LedY #FFF3B0
+Main -> Traffic : init()
+Traffic -> Timer : armX(COLOR_R_TIME)
+Traffic -> LedR : ledOn()
+Timer -[#2E8B57]>> Traffic : TOUT
+Traffic -[#2E8B57]> LedR : ledOff()
+Traffic -[#2E8B57]> LedY : ledOn()
+Traffic -[#2E8B57]> Timer : armX(COLOR_Y_TIME)
+@enduml
+
+
+' PASO 5 - El botón
+' El usuario pulsa una tecla en la consola. Button la lee y envía
+' el evento BUTTON a Traffic.
+@startuml paso5_boton
+title Paso 5 - El botón
+participant Main
+participant Button #palegreen
+participant Traffic
+participant Timer
+participant Console #palegreen
+participant LedR #FFC9C9
+participant LedY #FFF3B0
+Main -> Traffic : init()
+Traffic -> Timer : armX(COLOR_R_TIME)
+Traffic -> LedR : ledOn()
+Timer ->> Traffic : TOUT
+Traffic -> LedR : ledOff()
+Traffic -> LedY : ledOn()
+Traffic -> Timer : armX(COLOR_Y_TIME)
+Console -[#2E8B57]>> Button : tecla (espacio)
+Button -[#2E8B57]>> Traffic : BUTTON
+@enduml
+
+
+' PASO 6 - Fragmento alt
+' La reacción a BUTTON depende del estado: en G pasa a YtoR,
+' en cualquier otro estado lo ignora. Se expresa con alt / else / end.
+@startuml paso6_alt
+title Paso 6 - Fragmento alt
+participant Main
+participant Button
+participant Traffic
+participant Timer
+participant Console
+participant LedR #FFC9C9
+participant LedY #FFF3B0
+Main -> Traffic : init()
+Traffic -> Timer : armX(COLOR_R_TIME)
+Traffic -> LedR : ledOn()
+Timer ->> Traffic : TOUT
+Traffic -> LedR : ledOff()
+Traffic -> LedY : ledOn()
+Traffic -> Timer : armX(COLOR_Y_TIME)
+Console ->> Button : tecla (espacio)
+Button ->> Traffic : BUTTON
+alt estado == G
+Traffic -[#2E8B57]> Traffic : pasa a YtoR
+else otro estado
+Traffic -[#2E8B57]> Traffic : ignora BUTTON
+end
+@enduml
+
+
+' PASO 7 - Botón de peatón
+' PedestrianButton envía PEDESTRIAN. Traffic marca la solicitud como
+' pendiente para atenderla más adelante.
+@startuml paso7_peaton
+title Paso 7 - Botón de peatón
+participant Main
+participant Button
+participant PedestrianButton #palegreen
+participant Traffic
+participant Timer
+participant Console
+participant LedR #FFC9C9
+participant LedY #FFF3B0
+Main -> Traffic : init()
+Traffic -> Timer : armX(COLOR_R_TIME)
+Traffic -> LedR : ledOn()
+Timer ->> Traffic : TOUT
+Traffic -> LedR : ledOff()
+Traffic -> LedY : ledOn()
+Traffic -> Timer : armX(COLOR_Y_TIME)
+Console ->> Button : tecla (espacio)
+Button ->> Traffic : BUTTON
+alt estado == G
+Traffic -> Traffic : pasa a YtoR
+else otro estado
+Traffic -> Traffic : ignora BUTTON
+end
+PedestrianButton -[#2E8B57]>> Traffic : PEDESTRIAN
+Traffic -[#2E8B57]> Traffic : marca solicitud pendiente
+@enduml
+
+
+' PASO 8 - Activaciones, retornos y notas
+' Sin agregar participantes: se muestran las barras de activación
+' (activate / deactivate), el retorno de init() y una nota de estado.
+@startuml paso8_activaciones
+title Paso 8 - Activaciones, retornos y notas
+participant Main
+participant Button
+participant PedestrianButton
+participant Traffic
+participant Timer
+participant Console
+participant LedR #FFC9C9
+participant LedY #FFF3B0
+Main -> Traffic : init()
+activate Traffic
+Traffic -> Timer : armX(COLOR_R_TIME)
+Traffic -> LedR : ledOn()
+Traffic -[#2E8B57]-> Main : estado R
+deactivate Traffic
+note right of Traffic : estado inicial R
+Timer ->> Traffic : TOUT
+Traffic -> LedR : ledOff()
+Traffic -> LedY : ledOn()
+Traffic -> Timer : armX(COLOR_Y_TIME)
+Console ->> Button : tecla (espacio)
+Button ->> Traffic : BUTTON
+alt estado == G
+Traffic -> Traffic : pasa a YtoR
+else otro estado
+Traffic -> Traffic : ignora BUTTON
+end
+PedestrianButton ->> Traffic : PEDESTRIAN
+Traffic -> Traffic : marca solicitud pendiente
+@enduml
+
+
+' PASO 9 - Versión final
+' Mismo contenido que el paso 8, ordenado para presentar: autonumber,
+' participantes agrupados por capa (box) y LEDs con su color.
+@startuml paso9_final
+title Semáforo con botón de peatón - Secuencia final
+autonumber
+participant Main
+box "Application" #LightYellow
+  participant Button
+  participant PedestrianButton
+  participant Traffic
+end box
+box "Services" #LightBlue
+  participant Timer
+end box
+box "HAL" #LightGreen
+  participant Console
+  participant LedR #FFC9C9
+  participant LedY #FFF3B0
+end box
+Main -> Traffic : init()
+activate Traffic
+Traffic -> Timer : armX(COLOR_R_TIME)
+Traffic -> LedR : ledOn()
+Traffic --> Main : estado R
+deactivate Traffic
+note right of Traffic : estado inicial R
+Timer ->> Traffic : TOUT
+Traffic -> LedR : ledOff()
+Traffic -> LedY : ledOn()
+Traffic -> Timer : armX(COLOR_Y_TIME)
+Console ->> Button : tecla (espacio)
+Button ->> Traffic : BUTTON
+alt estado == G
+Traffic -> Traffic : pasa a YtoR
+else otro estado
+Traffic -> Traffic : ignora BUTTON
+end
+PedestrianButton ->> Traffic : PEDESTRIAN
+Traffic -> Traffic : marca solicitud pendiente
+@enduml

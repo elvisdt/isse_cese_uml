@@ -59,7 +59,7 @@ APP::Traffic::inst.colorTimeEvt.armX(COLOR_R_TIME, COLOR_R_TIME);
 APP::Traffic::inst.printTimeEvt.armX(PRINT_TIME, PRINT_TIME);
 (void)e; // unused parameter</action>
      <initial_glyph conn="5,11,5,0,12,3">
-      <action box="0,-7,60,7"/>
+      <action box="12,-10,56,12"/>
      </initial_glyph>
     </initial>
     <state name="root">

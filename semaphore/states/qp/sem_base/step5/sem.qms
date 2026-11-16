@@ -9,9 +9,9 @@
   <item name="backups">0</item>
  </group>
  <group name="windows">
-  <item id=".::main.cpp">0,0,601,411</item>
-  <item id="AOs::Traffic::SM">0,0,836,550,*</item>
-  <item id="AOs::Button::SM">196,81,640,480</item>
+  <item id=".::main.cpp">-187,0,601,411</item>
+  <item id="AOs::Traffic::SM">0,0,702,550,*</item>
+  <item id="AOs::Button::SM">-226,0,640,480</item>
  </group>
  <group name="search">
   <item name="options">2032128</item>
