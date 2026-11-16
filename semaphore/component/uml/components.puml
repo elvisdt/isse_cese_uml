@@ -1,0 +1,730 @@
+' ============================================================
+' Semáforo - Diagrama de componentes, construcción bottom-up
+' Un solo archivo con 9 pasos. Cada @startuml genera un diagrama.
+' Cada bloque muestra una breve descripción desde que aparece.
+' Verde = componente o interfaz NUEVO en ese paso.
+' Amarillo = componente existente que gana funciones (líneas con "+").
+' Los LEDs siempre usan su propio color (rojo, amarillo y verde claros).
+' El texto fuera de @startuml/@enduml es ignorado por PlantUML.
+' NOTA: -up- / -down- son pistas de layout (Application arriba, HAL
+' abajo). Los sockets se dibujan con la sintaxis  Cliente -( Interfaz.
+' ============================================================
+
+
+
+' PASO 1 - Componente dummy
+' Partimos de una caja vacía que representa "el sistema" sin saber
+' todavía qué hay adentro. Ya tiene una breve descripción, aunque
+' todavía no tiene interfaces ni responsabilidades.
+@startuml paso1_dummy
+title Paso 1 - Componente dummy
+component Dummy #palegreen [
+  **Dummy**
+  --
+  Caja vacía
+  sin responsabilidades todavía
+]
+
+
+@enduml
+
+
+' PASO 2 - La capa más baja (HAL): LEDs y consola
+' Empezamos desde abajo: los componentes que tocan el hardware.
+' Cada LED PROVEE la interfaz ILed (ball) y la consola provee IConsole.
+' Cada bloque muestra una breve descripción de lo que hace.
+@startuml paso2_hal
+title Paso 2 - Capa HAL
+skinparam componentStyle uml2
+skinparam packageStyle rectangle
+package "HAL" {
+  component LedR #FFC9C9 [
+    **LedR**
+    --
+    Luz roja
+    ledOn() / ledOff()
+  ]
+  component LedY #FFF3B0 [
+    **LedY**
+    --
+    Luz amarilla
+    ledOn() / ledOff()
+  ]
+  component LedG #C9F2C9 [
+    **LedG**
+    --
+    Luz verde
+    ledOn() / ledOff()
+  ]
+  component Console #palegreen [
+    **Console**
+    --
+    Entrada y salida
+    por terminal
+    consoleGetKey(), print()
+  ]
+}
+component Dummy [
+  **Dummy**
+  --
+  Caja vacía
+  sin responsabilidades todavía
+]
+() ILed #palegreen
+() IConsole #palegreen
+
+LedR -up- ILed
+LedY -up- ILed
+LedG -up- ILed
+Console -up- IConsole
+
+@enduml
+
+
+' PASO 3 - Servicios: el temporizador
+' Subimos una capa. Timer ofrece ITimer (arma y desarma eventos TOUT).
+' Es el servicio de tiempo que usará la máquina de estados.
+@startuml paso3_servicios
+title Paso 3 - Capa de servicios (Timer)
+skinparam componentStyle uml2
+skinparam packageStyle rectangle
+package "Services" {
+  component Timer #palegreen [
+    **Timer**
+    --
+    Servicio de tiempo
+    Genera TOUT al vencer
+    cada estado
+  ]
+}
+package "HAL" {
+  component LedR #FFC9C9 [
+    **LedR**
+    --
+    Luz roja
+    ledOn() / ledOff()
+  ]
+  component LedY #FFF3B0 [
+    **LedY**
+    --
+    Luz amarilla
+    ledOn() / ledOff()
+  ]
+  component LedG #C9F2C9 [
+    **LedG**
+    --
+    Luz verde
+    ledOn() / ledOff()
+  ]
+  component Console [
+    **Console**
+    --
+    Entrada y salida
+    por terminal
+    consoleGetKey(), print()
+  ]
+}
+component Dummy [
+  **Dummy**
+  --
+  Caja vacía
+  sin responsabilidades todavía
+]
+() ILed
+() IConsole
+() ITimer #palegreen
+
+LedR -up- ILed
+LedY -up- ILed
+LedG -up- ILed
+Console -up- IConsole
+Timer -up- ITimer
+
+@enduml
+
+
+' PASO 4 - El dummy se convierte en Traffic
+' El dummy se llena de sentido: es Traffic, la máquina de estados.
+' REQUIERE ILed e ITimer (sockets -( ) y PROVEE ITrafficEvents para
+' que otros le envíen eventos.
+@startuml paso4_traffic
+title Paso 4 - Dummy -> Traffic
+skinparam componentStyle uml2
+skinparam packageStyle rectangle
+package "Application" {
+  component Traffic #palegreen [
+    **Traffic**
+    --
+    Máquina de estados
+    R > YtoG > G > YtoR
+    Atiende BUTTON y TOUT
+    Enciende y apaga los LEDs
+  ]
+}
+package "Services" {
+  component Timer [
+    **Timer**
+    --
+    Servicio de tiempo
+    Genera TOUT al vencer
+    cada estado
+  ]
+}
+package "HAL" {
+  component LedR #FFC9C9 [
+    **LedR**
+    --
+    Luz roja
+    ledOn() / ledOff()
+  ]
+  component LedY #FFF3B0 [
+    **LedY**
+    --
+    Luz amarilla
+    ledOn() / ledOff()
+  ]
+  component LedG #C9F2C9 [
+    **LedG**
+    --
+    Luz verde
+    ledOn() / ledOff()
+  ]
+  component Console [
+    **Console**
+    --
+    Entrada y salida
+    por terminal
+    consoleGetKey(), print()
+  ]
+}
+() ILed
+() IConsole
+() ITimer
+() ITrafficEvents #palegreen
+
+LedR -up- ILed
+LedY -up- ILed
+LedG -up- ILed
+Console -up- IConsole
+Timer -up- ITimer
+Traffic -down- ITrafficEvents
+
+Traffic -down-( ILed
+Traffic -down-( ITimer
+@enduml
+
+
+' PASO 5 - El botón del semáforo
+' Button lee una tecla de la consola (requiere IConsole) y manda
+' eventos BUTTON a Traffic (requiere ITrafficEvents).
+@startuml paso5_button
+title Paso 5 - Botón
+skinparam componentStyle uml2
+skinparam packageStyle rectangle
+package "Application" {
+  component Traffic [
+    **Traffic**
+    --
+    Máquina de estados
+    R > YtoG > G > YtoR
+    Atiende BUTTON y TOUT
+    Enciende y apaga los LEDs
+  ]
+  component Button #palegreen [
+    **Button**
+    --
+    Lee la tecla de la consola
+    Publica el evento BUTTON
+  ]
+}
+package "Services" {
+  component Timer [
+    **Timer**
+    --
+    Servicio de tiempo
+    Genera TOUT al vencer
+    cada estado
+  ]
+}
+package "HAL" {
+  component LedR #FFC9C9 [
+    **LedR**
+    --
+    Luz roja
+    ledOn() / ledOff()
+  ]
+  component LedY #FFF3B0 [
+    **LedY**
+    --
+    Luz amarilla
+    ledOn() / ledOff()
+  ]
+  component LedG #C9F2C9 [
+    **LedG**
+    --
+    Luz verde
+    ledOn() / ledOff()
+  ]
+  component Console [
+    **Console**
+    --
+    Entrada y salida
+    por terminal
+    consoleGetKey(), print()
+  ]
+}
+() ILed
+() IConsole
+() ITimer
+() ITrafficEvents
+
+LedR -up- ILed
+LedY -up- ILed
+LedG -up- ILed
+Console -up- IConsole
+Timer -up- ITimer
+Traffic -down- ITrafficEvents
+
+Traffic -down-( ILed
+Traffic -down-( ITimer
+Button -down-( ITrafficEvents
+Button -down-( IConsole
+@enduml
+
+
+' PASO 6 - Botón de peatón
+' PedestrianButton reutiliza las MISMAS interfaces: requiere
+' ITrafficEvents (evento PEDESTRIAN) e IConsole. Un ball con varios
+' clientes. Traffic (amarillo) solo amplía lo que atiende.
+@startuml paso6_peaton
+title Paso 6 - Botón de peatón
+skinparam componentStyle uml2
+skinparam packageStyle rectangle
+package "Application" {
+  component Traffic #lightyellow [
+    **Traffic**
+    --
+    Máquina de estados
+    R > YtoG > G > YtoR
+    Atiende BUTTON y TOUT
+    Enciende y apaga los LEDs
+    + Atiende PEDESTRIAN
+  ]
+  component Button [
+    **Button**
+    --
+    Lee la tecla de la consola
+    Publica el evento BUTTON
+  ]
+  component PedestrianButton #palegreen [
+    **PedestrianButton**
+    --
+    Lee la tecla del peatón
+    Publica el evento PEDESTRIAN
+  ]
+}
+package "Services" {
+  component Timer [
+    **Timer**
+    --
+    Servicio de tiempo
+    Genera TOUT al vencer
+    cada estado
+  ]
+}
+package "HAL" {
+  component LedR #FFC9C9 [
+    **LedR**
+    --
+    Luz roja
+    ledOn() / ledOff()
+  ]
+  component LedY #FFF3B0 [
+    **LedY**
+    --
+    Luz amarilla
+    ledOn() / ledOff()
+  ]
+  component LedG #C9F2C9 [
+    **LedG**
+    --
+    Luz verde
+    ledOn() / ledOff()
+  ]
+  component Console [
+    **Console**
+    --
+    Entrada y salida
+    por terminal
+    consoleGetKey(), print()
+  ]
+}
+() ILed
+() IConsole
+() ITimer
+() ITrafficEvents
+
+LedR -up- ILed
+LedY -up- ILed
+LedG -up- ILed
+Console -up- IConsole
+Timer -up- ITimer
+Traffic -down- ITrafficEvents
+
+Traffic -down-( ILed
+Traffic -down-( ITimer
+Button -down-( ITrafficEvents
+Button -down-( IConsole
+PedestrianButton -down-( ITrafficEvents
+PedestrianButton -down-( IConsole
+@enduml
+
+
+' PASO 7 - Configuración y registro (Config y Logger)
+' Dos servicios nuevos: Config ofrece IConfig (tiempos por estado) y
+' Logger ofrece ILog (usa IConsole para imprimir). Traffic los requiere.
+' Timer y Console ganan funciones: tiempos configurables y niveles de log.
+@startuml paso7_config_logger
+title Paso 7 - Config y Logger
+skinparam componentStyle uml2
+skinparam packageStyle rectangle
+package "Application" {
+  component Traffic #lightyellow [
+    **Traffic**
+    --
+    Máquina de estados
+    R > YtoG > G > YtoR
+    Atiende BUTTON y TOUT
+    Enciende y apaga los LEDs
+    + Atiende PEDESTRIAN
+    + Lee tiempos de IConfig
+    + Registra con ILog
+  ]
+  component Button [
+    **Button**
+    --
+    Lee la tecla de la consola
+    Publica el evento BUTTON
+  ]
+  component PedestrianButton [
+    **PedestrianButton**
+    --
+    Lee la tecla del peatón
+    Publica el evento PEDESTRIAN
+  ]
+}
+package "Services" {
+  component Timer #lightyellow [
+    **Timer**
+    --
+    Servicio de tiempo
+    Genera TOUT al vencer
+    cada estado
+    + Tiempos configurables
+  ]
+  component Config #palegreen [
+    **Config**
+    --
+    Tiempos por estado
+    (rojo, amarillo, verde)
+  ]
+  component Logger #palegreen [
+    **Logger**
+    --
+    Registra transiciones
+    y eventos con nivel
+  ]
+}
+package "HAL" {
+  component LedR #FFC9C9 [
+    **LedR**
+    --
+    Luz roja
+    ledOn() / ledOff()
+  ]
+  component LedY #FFF3B0 [
+    **LedY**
+    --
+    Luz amarilla
+    ledOn() / ledOff()
+  ]
+  component LedG #C9F2C9 [
+    **LedG**
+    --
+    Luz verde
+    ledOn() / ledOff()
+  ]
+  component Console #lightyellow [
+    **Console**
+    --
+    Entrada y salida
+    por terminal
+    consoleGetKey(), print()
+    + Niveles de log
+  ]
+}
+() ILed
+() IConsole
+() ITimer
+() ITrafficEvents
+() IConfig #palegreen
+() ILog #palegreen
+
+LedR -up- ILed
+LedY -up- ILed
+LedG -up- ILed
+Console -up- IConsole
+Timer -up- ITimer
+Traffic -down- ITrafficEvents
+Config -up- IConfig
+Logger -up- ILog
+
+Traffic -down-( ILed
+Traffic -down-( ITimer
+Button -down-( ITrafficEvents
+Button -down-( IConsole
+PedestrianButton -down-( ITrafficEvents
+PedestrianButton -down-( IConsole
+Traffic -down-( IConfig
+Traffic -down-( ILog
+Logger -down-( IConsole
+@enduml
+
+
+' PASO 8 - Mejoras internas de cada componente
+' Sin agregar componentes ni interfaces, cada bloque crece por dentro:
+' antirrebote, solicitud peatonal recordada, parpadeo del LED amarillo,
+' estados INACTIVE / RESUME y modo nocturno. Las líneas con "+" son nuevas.
+@startuml paso8_mejoras
+title Paso 8 - Mejoras internas
+skinparam componentStyle uml2
+skinparam packageStyle rectangle
+package "Application" {
+  component Traffic #lightyellow [
+    **Traffic**
+    --
+    Máquina de estados
+    R > YtoG > G > YtoR
+    Atiende BUTTON y TOUT
+    Enciende y apaga los LEDs
+    + Atiende PEDESTRIAN
+    + Lee tiempos de IConfig
+    + Registra con ILog
+    + Estados INACTIVE / RESUME
+    + Modo nocturno (amarillo)
+  ]
+  component Button #lightyellow [
+    **Button**
+    --
+    Lee la tecla de la consola
+    Publica el evento BUTTON
+    + Antirrebote
+  ]
+  component PedestrianButton #lightyellow [
+    **PedestrianButton**
+    --
+    Lee la tecla del peatón
+    Publica el evento PEDESTRIAN
+    + Recuerda la solicitud
+    + hasta el próximo verde
+  ]
+}
+package "Services" {
+  component Timer [
+    **Timer**
+    --
+    Servicio de tiempo
+    Genera TOUT al vencer
+    cada estado
+    + Tiempos configurables
+  ]
+  component Config [
+    **Config**
+    --
+    Tiempos por estado
+    (rojo, amarillo, verde)
+  ]
+  component Logger [
+    **Logger**
+    --
+    Registra transiciones
+    y eventos con nivel
+  ]
+}
+package "HAL" {
+  component LedR #FFC9C9 [
+    **LedR**
+    --
+    Luz roja
+    ledOn() / ledOff()
+  ]
+  component LedY #FFF3B0 [
+    **LedY**
+    --
+    Luz amarilla
+    ledOn() / ledOff()
+    + ledToggle(): parpadeo
+  ]
+  component LedG #C9F2C9 [
+    **LedG**
+    --
+    Luz verde
+    ledOn() / ledOff()
+  ]
+  component Console [
+    **Console**
+    --
+    Entrada y salida
+    por terminal
+    consoleGetKey(), print()
+    + Niveles de log
+  ]
+}
+() ILed
+() IConsole
+() ITimer
+() ITrafficEvents
+() IConfig
+() ILog
+
+LedR -up- ILed
+LedY -up- ILed
+LedG -up- ILed
+Console -up- IConsole
+Timer -up- ITimer
+Traffic -down- ITrafficEvents
+Config -up- IConfig
+Logger -up- ILog
+
+Traffic -down-( ILed
+Traffic -down-( ITimer
+Button -down-( ITrafficEvents
+Button -down-( IConsole
+PedestrianButton -down-( ITrafficEvents
+PedestrianButton -down-( IConsole
+Traffic -down-( IConfig
+Traffic -down-( ILog
+Logger -down-( IConsole
+@enduml
+
+
+' PASO 9 - Versión final
+' Mismo contenido que el paso 8, ordenado para presentar: paquetes
+' con color por capa y una nota con los eventos de ITrafficEvents.
+@startuml 
+'paso9_final
+title Semáforo con botón de peatón - Diagrama final
+skinparam componentStyle uml2
+skinparam packageStyle rectangle
+package "Application" #LightYellow {
+  component Traffic [
+    **Traffic**
+    --
+    Máquina de estados
+    R > YtoG > G > YtoR
+    Atiende BUTTON y TOUT
+    Enciende y apaga los LEDs
+    + Atiende PEDESTRIAN
+    + Lee tiempos de IConfig
+    + Registra con ILog
+    + Estados INACTIVE / RESUME
+    + Modo nocturno (amarillo)
+  ]
+  component Button [
+    **Button**
+    --
+    Lee la tecla de la consola
+    Publica el evento BUTTON
+    + Antirrebote
+  ]
+  component PedestrianButton [
+    **PedestrianButton**
+    --
+    Lee la tecla del peatón
+    Publica el evento PEDESTRIAN
+    + Recuerda la solicitud
+    + hasta el próximo verde
+  ]
+}
+package "Services" #LightBlue {
+  component Timer [
+    **Timer**
+    --
+    Servicio de tiempo
+    Genera TOUT al vencer
+    cada estado
+    + Tiempos configurables
+  ]
+  component Config [
+    **Config**
+    --
+    Tiempos por estado
+    (rojo, amarillo, verde)
+  ]
+  component Logger [
+    **Logger**
+    --
+    Registra transiciones
+    y eventos con nivel
+  ]
+}
+package "HAL" #LightGreen {
+  component LedR #FFC9C9 [
+    **LedR**
+    --
+    Luz roja
+    ledOn() / ledOff()
+  ]
+  component LedY #FFF3B0 [
+    **LedY**
+    --
+    Luz amarilla
+    ledOn() / ledOff()
+    + ledToggle(): parpadeo
+  ]
+  component LedG #C9F2C9 [
+    **LedG**
+    --
+    Luz verde
+    ledOn() / ledOff()
+  ]
+  component Console [
+    **Console**
+    --
+    Entrada y salida
+    por terminal
+    consoleGetKey(), print()
+    + Niveles de log
+  ]
+}
+() ILed
+() IConsole
+() ITimer
+() ITrafficEvents
+() IConfig
+() ILog
+
+LedR -up- ILed
+LedY -up- ILed
+LedG -up- ILed
+Console -up- IConsole
+Timer -up- ITimer
+Traffic -down- ITrafficEvents
+Config -up- IConfig
+Logger -up- ILog
+
+Traffic -down-( ILed
+Traffic -down-( ITimer
+Button -down-( ITrafficEvents
+Button -down-( IConsole
+PedestrianButton -down-( ITrafficEvents
+PedestrianButton -down-( IConsole
+Traffic -down-( IConfig
+Traffic -down-( ILog
+Logger -down-( IConsole
+
+note right of ITrafficEvents
+  Eventos: BUTTON, PEDESTRIAN,
+  PRINT, INACTIVE, RESUME
+end note
+@enduml

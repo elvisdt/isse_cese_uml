@@ -479,6 +479,7 @@ Q_STATE_DEF(Traffic, R) {
         //${AOs::Traffic::SM::root::R}
         case Q_EXIT_SIG: {
             APP::Traffic::inst.ledR.off();
+            APP::Traffic::inst.buttonPressed=0;
             status_ = Q_RET_HANDLED;
             break;
         }

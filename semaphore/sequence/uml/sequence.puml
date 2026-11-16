@@ -1,0 +1,11 @@
+@startuml
+participant A
+participant B
+participant C
+ 
+database aaa
+A -> B
+B -->> C
+C -->> A
+@enduml
+

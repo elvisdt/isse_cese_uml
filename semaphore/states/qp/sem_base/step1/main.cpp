@@ -51,79 +51,12 @@ void QF::onCleanup  (void) {QF::consoleCleanup();}
 void QF::onClockTick(void) {QTimeEvt::TICK_X(0U, nullptr);}  // QTimeEvt clock tick processing
 } // namespace QP
 
-enum colorTimers : uint32_t {
-    COLOR_R_TIME = 500,
-    COLOR_Y_TIME = 200,
-    COLOR_G_TIME = 3000,
-    PRINT_TIME = 100,
-    PULL_TIME = 10,
-
-};
-
-enum AppSignals : uint32_t {
-  TOUT_SIG = QP::Q_USER_SIG,
-PRINT_SIG,
-BUTTON_SIG,
+enum AppSignals : std::uint32_t {
+   TOUT_SIG = QP::Q_USER_SIG,
 };
 
 #define PRINT(str) std::cout << str << std::endl;
-#define REARM(time) APP::Traffic::inst.colorTimeEvt.rearm(time);
-#define PRINT_CTR()  std::cout << APP::Traffic::inst.colorTimeEvt.getCtr()/100 << std::endl
 
-
-//$declare${AOs::Led} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-namespace APP {
-
-//${AOs::Led} ................................................................
-class Led {
-public:
-    void ledOn(std::string color);
-}; // class Led
-
-} // namespace APP
-//$enddecl${AOs::Led} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//$declare${AOs::LedR} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-namespace APP {
-
-//${AOs::LedR} ...............................................................
-class LedR : public APP::Led {
-public:
-    static LedR inst;
-
-public:
-    void on();
-}; // class LedR
-
-} // namespace APP
-//$enddecl${AOs::LedR} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//$declare${AOs::LedY} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-namespace APP {
-
-//${AOs::LedY} ...............................................................
-class LedY : public APP::Led {
-public:
-    static LedY inst;
-
-public:
-    void on();
-}; // class LedY
-
-} // namespace APP
-//$enddecl${AOs::LedY} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//$declare${AOs::LedG} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-namespace APP {
-
-//${AOs::LedG} ...............................................................
-class LedG : public APP::Led {
-public:
-    static LedG inst;
-
-public:
-    void on();
-}; // class LedG
-
-} // namespace APP
-//$enddecl${AOs::LedG} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 //$declare${AOs::Traffic} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 namespace APP {
 
@@ -131,103 +64,26 @@ namespace APP {
 class Traffic : public QP::QActive {
 public:
     static Traffic inst;
-    QP::QTimeEvt colorTimeEvt;
-    QP::QTimeEvt printTimeEvt;
-    APP::LedR* ledR=&APP::LedR::inst;
-    APP::LedY* ledY=&APP::LedY::inst;
-    APP::LedG* ledG=&APP::LedG::inst;
 
 public:
     Traffic();
 
 protected:
     Q_STATE_DECL(initial);
-    Q_STATE_DECL(root);
     Q_STATE_DECL(YtoG);
-    Q_STATE_DECL(YtoR);
     Q_STATE_DECL(G);
+    Q_STATE_DECL(YtoR);
     Q_STATE_DECL(R);
 }; // class Traffic
 
 } // namespace APP
 //$enddecl${AOs::Traffic} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//$declare${AOs::Button} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-namespace APP {
-
-//${AOs::Button} .............................................................
-class Button : public QP::QActive {
-public:
-    QP::QTimeEvt pullTimeEvt;
-    static Button inst;
-
-public:
-    Button();
-
-protected:
-    Q_STATE_DECL(initial);
-    Q_STATE_DECL(pulling);
-}; // class Button
-
-} // namespace APP
-//$enddecl${AOs::Button} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 //$skip${QP_VERSION} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 // Check for the minimum required QP version
 #if (QP_VERSION < 730U) || (QP_VERSION != ((QP_RELEASE^4294967295U)%0x2710U))
 #error qpcpp version 7.3.0 or higher required
 #endif
 //$endskip${QP_VERSION} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//$define${AOs::Led} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-namespace APP {
-
-//${AOs::Led} ................................................................
-
-//${AOs::Led::ledOn} .........................................................
-void Led::ledOn(std::string color) {
-    PRINT(color);
-}
-
-} // namespace APP
-//$enddef${AOs::Led} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//$define${AOs::LedR} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-namespace APP {
-
-//${AOs::LedR} ...............................................................
-LedR LedR::inst;
-
-//${AOs::LedR::on} ...........................................................
-void LedR::on() {
-    ledOn("RR");
-}
-
-} // namespace APP
-//$enddef${AOs::LedR} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//$define${AOs::LedY} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-namespace APP {
-
-//${AOs::LedY} ...............................................................
-LedY LedY::inst;
-
-//${AOs::LedY::on} ...........................................................
-void LedY::on() {
-    ledOn("Y");
-}
-
-} // namespace APP
-//$enddef${AOs::LedY} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//$define${AOs::LedG} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-namespace APP {
-
-//${AOs::LedG} ...............................................................
-LedG LedG::inst;
-
-//${AOs::LedG::on} ...........................................................
-void LedG::on() {
-    ledOn("G");
-}
-
-} // namespace APP
-//$enddef${AOs::LedG} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 //$define${AOs::Traffic} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 namespace APP {
 
@@ -236,43 +92,29 @@ Traffic Traffic::inst;
 
 //${AOs::Traffic::Traffic} ...................................................
 Traffic::Traffic()
-: QActive(Q_STATE_CAST(&Traffic::initial)),
- colorTimeEvt(this, TOUT_SIG, 0U),
- printTimeEvt(this, PRINT_SIG, 0U)
-
+: QActive(Q_STATE_CAST(&Traffic::initial))
 {}
 
 //${AOs::Traffic::SM} ........................................................
 Q_STATE_DEF(Traffic, initial) {
     //${AOs::Traffic::SM::initial}
-    std::cout << "init1" << std::endl;
-    APP::Traffic::inst.colorTimeEvt.armX(COLOR_R_TIME,COLOR_R_TIME);
-    APP::Traffic::inst.printTimeEvt.armX(PRINT_TIME,PRINT_TIME);
+    (void)e;
 
-    (void)e; // unused parameter
-
-    QS_FUN_DICTIONARY(&Traffic::root);
     QS_FUN_DICTIONARY(&Traffic::YtoG);
-    QS_FUN_DICTIONARY(&Traffic::YtoR);
     QS_FUN_DICTIONARY(&Traffic::G);
+    QS_FUN_DICTIONARY(&Traffic::YtoR);
     QS_FUN_DICTIONARY(&Traffic::R);
 
     return tran(&R);
 }
 
-//${AOs::Traffic::SM::root} ..................................................
-Q_STATE_DEF(Traffic, root) {
+//${AOs::Traffic::SM::YtoG} ..................................................
+Q_STATE_DEF(Traffic, YtoG) {
     QP::QState status_;
     switch (e->sig) {
-        //${AOs::Traffic::SM::root::PRINT}
-        case PRINT_SIG: {
-            PRINT_CTR();
-            status_ = Q_RET_HANDLED;
-            break;
-        }
-        //${AOs::Traffic::SM::root::BUTTON}
-        case BUTTON_SIG: {
-            PRINT("button signal received");
+        //${AOs::Traffic::SM::YtoG}
+        case Q_ENTRY_SIG: {
+            PRINT("YtoG");
             status_ = Q_RET_HANDLED;
             break;
         }
@@ -284,96 +126,54 @@ Q_STATE_DEF(Traffic, root) {
     return status_;
 }
 
-//${AOs::Traffic::SM::root::YtoG} ............................................
-Q_STATE_DEF(Traffic, YtoG) {
-    QP::QState status_;
-    switch (e->sig) {
-        //${AOs::Traffic::SM::root::YtoG}
-        case Q_ENTRY_SIG: {
-            APP::Traffic::inst.ledY->on();
-            REARM(COLOR_Y_TIME);
-            status_ = Q_RET_HANDLED;
-            break;
-        }
-        //${AOs::Traffic::SM::root::YtoG::TOUT}
-        case TOUT_SIG: {
-            status_ = tran(&G);
-            break;
-        }
-        default: {
-            status_ = super(&root);
-            break;
-        }
-    }
-    return status_;
-}
-
-//${AOs::Traffic::SM::root::YtoR} ............................................
-Q_STATE_DEF(Traffic, YtoR) {
-    QP::QState status_;
-    switch (e->sig) {
-        //${AOs::Traffic::SM::root::YtoR}
-        case Q_ENTRY_SIG: {
-            APP::Traffic::inst.ledY->on();
-            REARM(COLOR_Y_TIME);
-            status_ = Q_RET_HANDLED;
-            break;
-        }
-        //${AOs::Traffic::SM::root::YtoR::TOUT}
-        case TOUT_SIG: {
-            status_ = tran(&R);
-            break;
-        }
-        default: {
-            status_ = super(&root);
-            break;
-        }
-    }
-    return status_;
-}
-
-//${AOs::Traffic::SM::root::G} ...............................................
+//${AOs::Traffic::SM::G} .....................................................
 Q_STATE_DEF(Traffic, G) {
     QP::QState status_;
     switch (e->sig) {
-        //${AOs::Traffic::SM::root::G}
+        //${AOs::Traffic::SM::G}
         case Q_ENTRY_SIG: {
-            APP::Traffic::inst.ledG->on();
-            REARM(COLOR_G_TIME);
+            PRINT("G");
             status_ = Q_RET_HANDLED;
             break;
         }
-        //${AOs::Traffic::SM::root::G::TOUT}
-        case TOUT_SIG: {
-            status_ = tran(&YtoR);
-            break;
-        }
         default: {
-            status_ = super(&root);
+            status_ = super(&top);
             break;
         }
     }
     return status_;
 }
 
-//${AOs::Traffic::SM::root::R} ...............................................
-Q_STATE_DEF(Traffic, R) {
+//${AOs::Traffic::SM::YtoR} ..................................................
+Q_STATE_DEF(Traffic, YtoR) {
     QP::QState status_;
     switch (e->sig) {
-        //${AOs::Traffic::SM::root::R}
+        //${AOs::Traffic::SM::YtoR}
         case Q_ENTRY_SIG: {
-            APP::Traffic::inst.ledR->on();
-            REARM(COLOR_R_TIME);
+            PRINT("YtoR");
             status_ = Q_RET_HANDLED;
             break;
         }
-        //${AOs::Traffic::SM::root::R::TOUT}
-        case TOUT_SIG: {
-            status_ = tran(&YtoG);
+        default: {
+            status_ = super(&top);
+            break;
+        }
+    }
+    return status_;
+}
+
+//${AOs::Traffic::SM::R} .....................................................
+Q_STATE_DEF(Traffic, R) {
+    QP::QState status_;
+    switch (e->sig) {
+        //${AOs::Traffic::SM::R}
+        case Q_ENTRY_SIG: {
+            PRINT("Rojo");
+            status_ = Q_RET_HANDLED;
             break;
         }
         default: {
-            status_ = super(&root);
+            status_ = super(&top);
             break;
         }
     }
@@ -382,60 +182,6 @@ Q_STATE_DEF(Traffic, R) {
 
 } // namespace APP
 //$enddef${AOs::Traffic} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//$define${AOs::Button} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-namespace APP {
-
-//${AOs::Button} .............................................................
-Button Button::inst;
-
-//${AOs::Button::Button} .....................................................
-Button::Button()
-: QActive(Q_STATE_CAST(&Button::initial)),
- pullTimeEvt(this, TOUT_SIG, 0U)
-
-{}
-
-//${AOs::Button::SM} .........................................................
-Q_STATE_DEF(Button, initial) {
-    //${AOs::Button::SM::initial}
-    PRINT("button init");
-    APP::Button::inst.pullTimeEvt.armX(PULL_TIME,PULL_TIME);
-
-    (void)e; // unused parameter
-    return tran(&pulling);
-}
-
-//${AOs::Button::SM::pulling} ................................................
-Q_STATE_DEF(Button, pulling) {
-    QP::QState status_;
-    switch (e->sig) {
-        //${AOs::Button::SM::pulling::TOUT}
-        case TOUT_SIG: {
-            switch (QP::QF::consoleGetKey()) {
-
-              case ' ':
-               {
-                PRINT("space");
-                static QP::QEvt evt(BUTTON_SIG);
-                APP::Traffic::inst.POST(&evt,0);
-               }
-            break;
-              default:
-                break;
-            };
-            status_ = Q_RET_HANDLED;
-            break;
-        }
-        default: {
-            status_ = super(&top);
-            break;
-        }
-    }
-    return status_;
-}
-
-} // namespace APP
-//$enddef${AOs::Button} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 int main()
 {
@@ -447,14 +193,6 @@ int main()
         trafficQueueSto,             // event queue storage
         Q_DIM(trafficQueueSto),      // queue length [events]
         nullptr, 0U);                // no stack storage
-
-
-    QP::QEvt const *buttonQueueSto[10];
-    APP::Button::inst.start(
-        2U,                          // QP prio. of the AO
-        buttonQueueSto,             // event queue storage
-        Q_DIM(buttonQueueSto),      // queue length [events]
-        nullptr, 0U);
 
     return QP::QF::run(); // run the QF application
 }

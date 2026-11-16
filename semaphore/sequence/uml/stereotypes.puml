@@ -1,0 +1,86 @@
+@startuml 
+'Cruce_Peatonal_Stereotypes
+
+' ===== ACTOR =====
+' Persona externa al sistema que inicia la interacción
+actor "Peatón" as Pea
+
+' ===== BOUNDARY =====
+' Punto de contacto entre el mundo exterior y el sistema (UI, hardware de entrada)
+boundary "Botón de Cruce" as Btn
+boundary "Semáforo NS" as NS
+boundary "Semáforo EO" as EO
+
+' ===== CONTROL =====
+' Lógica de coordinación / decisión, sin estado persistente propio
+control "Controlador de Tráfico" as Ctrl
+
+' ===== ENTITY =====
+' Objeto de dominio con datos persistentes (representa el "estado" del sistema)
+entity "Estado del Cruce" as Estado
+
+' ===== DATABASE =====
+' Almacenamiento persistente de bajo nivel
+database "BD de Eventos" as DB
+
+' ===== COLLECTIONS =====
+' Múltiples instancias / un conjunto de elementos
+collections "Solicitudes Pendientes" as Pendientes
+
+' ===== QUEUE =====
+' Estructura FIFO, útil para eventos asíncronos
+queue "Cola de Eventos" as EventQ
+
+' ===== PARTICIPANT (genérico, sin estereotipo) =====
+participant "Panel de Monitoreo" as Panel
+
+== Solicitud de cruce ==
+
+autonumber
+
+Pea -> Btn : presiona botón
+activate Btn
+
+Btn -> EventQ : encola evento(solicitud_cruce)
+deactivate Btn
+
+EventQ -> Ctrl : despacha evento
+activate Ctrl
+
+Ctrl -> Pendientes : agrega(id_solicitud)
+Ctrl -> Estado : consultar(fase_actual)
+activate Estado
+Estado --> Ctrl : fase = "NS_verde"
+deactivate Estado
+
+== Decisión y cambio de fase ==
+
+alt fase permite cambio
+    Ctrl -> Estado : actualizar(fase = "transición")
+    activate Estado
+    Estado --> Ctrl : ok
+    deactivate Estado
+
+    Ctrl -> NS : set(color = "amarillo")
+    Ctrl -> EO : set(color = "rojo")
+
+    Ctrl -> DB : INSERT evento(cambio_fase, timestamp)
+    activate DB
+    DB --> Ctrl : ack
+    deactivate DB
+
+    Ctrl -> Pendientes : remover(id_solicitud)
+    Ctrl -> Panel : notificar(cambio_de_fase)
+else fase no permite cambio aún
+    Ctrl -> Pendientes : mantener(id_solicitud)
+end
+
+deactivate Ctrl
+autonumber stop
+
+== Confirmación al peatón ==
+
+Ctrl -> EO : set(color = "verde_peatonal")
+EO -> Pea : habilita cruce
+
+@enduml

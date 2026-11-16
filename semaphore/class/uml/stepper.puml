@@ -1,0 +1,205 @@
+@startuml 1 
+title <size:20><b>Phase 1</b></size>
+hide stereotype
+skinparam defaultTextAlignment center
+skinparam RoundCorner 15
+skinparam ArrowColor #555555
+skinparam ArrowThickness 2
+skinparam shadowing true
+
+skinparam rectangle {
+    BackgroundColor<<Phase1>> #A9D18E
+    BorderColor<<Phase1>> #385723
+    FontColor<<Phase1>> #000000
+    
+    BackgroundColor<<External>> #A9D18E
+    BorderColor<<External>> #555555
+}
+
+package "SW"  {
+   rectangle "PC/Host" <<External>> as Tester
+}
+package "HW"  {
+   rectangle "Stepper Driver IC" <<Phase1>> as Driver
+   rectangle "Micro Stepper\nMotor" <<Phase1>> as Motor
+}
+
+Tester <-right-> Driver : " Single Wire UART\n"
+Driver -right-> Motor : " Power\nOut"
+
+legend bottom
+    |= Color |= Phase |= Deliverables |
+    |<#A9D18E>| **1** | Basic bench test: Stepper Motor, Stepper Driver, Single-wire Interface |
+endlegend
+@enduml
+
+
+@startuml 2
+title <size:20><b>Phase 2</b></size>
+hide stereotype
+skinparam defaultTextAlignment center
+skinparam RoundCorner 15
+skinparam ArrowColor #555555
+skinparam ArrowThickness 2
+skinparam shadowing true
+
+skinparam rectangle {
+    BackgroundColor<<Phase1>> #A9D18E
+    BorderColor<<Phase1>> #385723
+    FontColor<<Phase1>> #000000
+
+    BackgroundColor<<Phase2>> #9DC3E6
+    BorderColor<<Phase2>> #203864
+    FontColor<<Phase2>> #000000
+}
+
+package "SW"  {
+   rectangle "ROS 2 Control Node\n(PC/Host)" <<Phase2>> as ROS_Node
+}
+package "HW"  {
+   rectangle "RS485 Transceiver" <<Phase2>> as Wired
+   rectangle "Microcontroller\n(MCU / Firmware)" <<Phase2>> as MCU
+   rectangle "Stepper Driver IC" <<Phase1>> as Driver
+   rectangle "Micro Stepper\nMotor" <<Phase1>> as Motor
+}
+
+ROS_Node <-> Wired : " Telemetry & Commands"
+Wired <-> MCU : " UART"
+MCU <-> Driver : " SPI\n(Config & Status)"
+Driver <-> Motor : " Power\nOut"
+
+legend bottom
+    |= Color |= Phase |= Deliverables |
+    |<#A9D18E>| **1** | Complete  - Hardware basics verified |
+    |<#9DC3E6>| **2** | Add uC, RS485 routing, SPI management, ROS 2 Node for Telemetry |
+endlegend
+
+@enduml
+
+@startuml 3
+title <size:20><b>Phase 3</b></size>
+hide stereotype
+skinparam defaultTextAlignment center
+skinparam RoundCorner 15
+skinparam ArrowColor #555555
+skinparam ArrowThickness 2
+skinparam shadowing true
+
+skinparam rectangle {
+    BackgroundColor<<Phase1>> #A9D18E
+    BorderColor<<Phase1>> #385723
+    FontColor<<Phase1>> #000000
+    
+    BackgroundColor<<Phase2>> #9DC3E6
+    BorderColor<<Phase2>> #203864
+    FontColor<<Phase2>> #000000
+
+    BackgroundColor<<Phase3>> #FFD966
+    BorderColor<<Phase3>> #7F6000
+    FontColor<<Phase3>> #000000
+
+}
+
+package "SW"  {
+   rectangle "ROS 2 Visualization\n(URDF, RViz, Foxglove)" <<Phase3>> as ROS_Vis
+   rectangle "ROS 2 Control Node" <<Phase2>> as ROS_Node
+}
+
+package "HW" {
+   rectangle "RS485\nTransceiver" <<Phase2>> as Wired
+   rectangle "Microcontroller\n(MCU / Firmware)" <<Phase2>> as MCU
+
+   rectangle "Stepper\nDriver IC" <<Phase1>> as Driver
+   rectangle "Micro Stepper\nMotor" <<Phase1>> as Motor
+   note top of MCU
+     **PCB Refinement**
+     Design optimized for Manufacturer (DFM)
+   end note
+}
+
+ROS_Vis <-> ROS_Node : " Topics / State"
+ROS_Node <-> Wired 
+Wired <-> MCU : "UART"
+MCU <-> Driver : " SPI"
+Driver <-> Motor : " Power\nOut"
+
+' Layout constraint
+
+legend bottom
+    |= Color |= Phase |= Deliverables |
+    |<#A9D18E>| **1** | Complete - Hardware basics verified |
+    |<#9DC3E6>| **2** | Complete - Firmware verified |
+    |<#FFD966>| **3** | ROS 2 URDF, RViz, Foxglove Viz, Improve PCB for manufacturing |
+endlegend
+@enduml
+
+@startuml 
+title <size:20><b>Optional</b></size>
+hide stereotype
+skinparam defaultTextAlignment center
+skinparam RoundCorner 15
+skinparam ArrowColor #555555
+skinparam ArrowThickness 2
+
+skinparam rectangle {
+   BackgroundColor<<Phase1>> #A9D18E
+   BorderColor<<Phase1>> #385723
+   FontColor<<Phase1>> #555555
+
+   BackgroundColor<<Phase2>> #9DC3E6
+   BorderColor<<Phase2>> #203864
+   FontColor<<Phase2>> #555555
+
+   BackgroundColor<<Phase3>> #FFD966
+   BorderColor<<Phase3>> #7F6000
+   FontColor<<Phase3>> #555555
+
+   BackgroundColor<<Optional>> #A2E252
+   BorderColor<<Optional>> #000000
+   LineThickness<<Optional>> 5
+   FontColor<<Optional>> #000000
+   shadowing<<Optional>> true
+}
+
+package "SW"  {
+   rectangle "ROS 2 Visualization\n(URDF, RViz, Foxglove)" <<Phase3>> as ROS_Vis
+   rectangle "ROS 2 Simulation\n(gazebo)" <<Optional>> as ROS_Gaz
+   rectangle "ROS 2 Control Node" <<Phase2>> as ROS_Node
+   rectangle "PC/Host\nCLI" <<External>> as Tester
+}
+
+package "HW" {
+   rectangle "RS485\nTransceiver" <<Phase2>> as Wired
+   rectangle "Microcontroller\n(MCU / Firmware)" <<Phase2>> as MCU
+
+   rectangle "Stepper\nDriver IC" <<Phase1>> as Driver
+   rectangle "Micro Stepper\nMotor" <<Phase1>> as Motor
+   rectangle "Wireless & OTA\n(WiFi, BLE)" <<Optional>> as Wireless
+   rectangle "USB" <<Optional>> as USB
+}
+
+ROS_Vis <-> ROS_Node : " Topics / State"
+ROS_Node <-> Wired 
+Wired <-up-> MCU : "UART"
+MCU <-> Driver : " SPI"
+USB -down-> MCU : "USB\nJTAG\nUART"
+Driver <-> Motor : " Power\nOut"
+Wireless <-> MCU : "Integrated\ncomms"
+Wireless <-> ROS_Node : "WiFi/BLE\ncomms"
+Wireless <-> Tester : "WiFi/BLE\ncomms"
+ROS_Gaz <-> ROS_Node : "Topics/State"
+Tester <-> Wired : "CLI\ncommands"
+USB -left-> Tester : "CLI\ncommands\nFlash"
+
+' Layout constraint
+'Wired -[hidden]down- MCU
+ROS_Vis -[hidden]down- ROS_Gaz
+
+legend bottom
+    |= Color |= Phase |= Deliverables |
+    |<#A9D18E>| **1** | Complete - Hardware basics verified |
+    |<#9DC3E6>| **2** | Complete - Firmware verified |
+    |<#FFD966>| **3** | ROS 2 URDF, RViz, Foxglove Viz, Improve PCB for manufacturing |
+    |<#F2F2F2>| **Optional** | Gazebo, WiFi, BLE, OTA firmware updates |
+endlegend
+@enduml

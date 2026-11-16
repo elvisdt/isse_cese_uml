@@ -1,0 +1,9 @@
+@startuml
+object "anObject" as anObject
+object "Another Instance" as obj2
+
+anObject : name = "Alice"
+anObject : age = 30
+
+anObject --> obj2
+@enduml

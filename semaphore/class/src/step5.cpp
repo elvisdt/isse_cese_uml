@@ -279,7 +279,8 @@ public:
 int main() {
     signal(SIGINT, onSignal); signal(SIGTERM, onSignal);
     Terminal::enableRaw();
-    App app; app.run();
+    App app; 
+    app.run();
     Terminal::disableRaw();
     return 0;
 }

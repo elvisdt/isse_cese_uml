@@ -15,7 +15,7 @@ public:
     void run() {
         printf("╔══════════════════════════════════╗\n");
         printf("║   Semáforo Peatonal — PASO 1     ║\n");
-        printf("║   Clase mínima: App existe.      ║\n");
+        printf("║   Clase mínima: Aiiiipp existe.      ║\n");
         printf("╚══════════════════════════════════╝\n");
     }
 };

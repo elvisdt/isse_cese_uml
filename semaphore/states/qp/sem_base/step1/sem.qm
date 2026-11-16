@@ -29,169 +29,41 @@ https://www.state-machine.com/qpcpp/exa.html</documentation>
  <package name="AOs" stereotype="0x02" namespace="APP::">
   <class name="Traffic" superclass="qpcpp::QActive">
    <attribute name="inst" type="Traffic" visibility="0x00" properties="0x01"/>
-   <attribute name="colorTimeEvt" type="QP::QTimeEvt" visibility="0x00" properties="0x00">
-    <code>;</code>
-   </attribute>
-   <attribute name="printTimeEvt" type="QP::QTimeEvt" visibility="0x00" properties="0x00">
-    <code>;</code>
-   </attribute>
-   <attribute name="ledR" type="APP::LedR*" visibility="0x00" properties="0x00">
-    <code>=&amp;APP::LedR::inst;</code>
-   </attribute>
-   <attribute name="ledY" type="APP::LedY*" visibility="0x00" properties="0x00">
-    <code>=&amp;APP::LedY::inst;</code>
-   </attribute>
-   <attribute name="ledG" type="APP::LedG*" visibility="0x00" properties="0x00">
-    <code>=&amp;APP::LedG::inst;</code>
-   </attribute>
    <operation name="Traffic" type="" visibility="0x00" properties="0x00">
-    <code>: QActive(Q_STATE_CAST(&amp;Traffic::initial)),
- colorTimeEvt(this, TOUT_SIG, 0U),
- printTimeEvt(this, PRINT_SIG, 0U)
-</code>
+    <code>: QActive(Q_STATE_CAST(&amp;Traffic::initial))</code>
    </operation>
    <statechart properties="0x02">
-    <initial target="../1/5">
-     <action>std::cout &lt;&lt; &quot;init1&quot; &lt;&lt; std::endl;
-APP::Traffic::inst.colorTimeEvt.armX(COLOR_R_TIME,COLOR_R_TIME);
-APP::Traffic::inst.printTimeEvt.armX(PRINT_TIME,PRINT_TIME);
-
-(void)e; // unused parameter</action>
-     <initial_glyph conn="10,7,5,0,10,14">
-      <action box="0,-2,10,2"/>
+    <initial target="../4">
+     <action>(void)e;</action>
+     <initial_glyph conn="5,11,5,0,12,9">
+      <action box="0,-2,60,7"/>
      </initial_glyph>
     </initial>
-    <state name="root">
-     <tran trig="PRINT">
-      <action>PRINT_CTR();</action>
-      <tran_glyph conn="6,57,3,-1,20">
-       <action box="3,-2,14,7"/>
-      </tran_glyph>
-     </tran>
-     <tran trig="BUTTON">
-      <action>PRINT(&quot;button signal received&quot;);</action>
-      <tran_glyph conn="6,61,3,-1,19">
-       <action box="3,-2,13,5"/>
-      </tran_glyph>
-     </tran>
-     <state name="YtoG">
-      <entry>APP::Traffic::inst.ledY-&gt;on();
-REARM(COLOR_Y_TIME);</entry>
-      <tran trig="TOUT" target="../../4">
-       <tran_glyph conn="58,29,1,3,11">
-        <action box="0,-2,10,2"/>
-       </tran_glyph>
-      </tran>
-      <state_glyph color="3" node="38,21,20,17">
-       <entry box="0,3,18,8"/>
-      </state_glyph>
-     </state>
-     <state name="YtoR">
-      <entry>APP::Traffic::inst.ledY-&gt;on();
-REARM(COLOR_Y_TIME);</entry>
-      <tran trig="TOUT" target="../../5">
-       <tran_glyph conn="39,50,3,2,-21,-12">
-        <action box="-15,-2,10,2"/>
-       </tran_glyph>
-      </tran>
-      <state_glyph color="3" node="39,40,19,18">
-       <entry box="0,3,19,8"/>
-      </state_glyph>
-     </state>
-     <state name="G">
-      <entry>APP::Traffic::inst.ledG-&gt;on();
-REARM(COLOR_G_TIME);</entry>
-      <tran trig="TOUT" target="../../3">
-       <tran_glyph conn="78,38,2,1,12,-20">
-        <action box="-15,10,10,2"/>
-       </tran_glyph>
-      </tran>
-      <state_glyph color="1" node="69,21,26,17">
-       <entry box="0,3,21,8"/>
-      </state_glyph>
-     </state>
-     <state name="R">
-      <entry>APP::Traffic::inst.ledR-&gt;on();
-REARM(COLOR_R_TIME);</entry>
-      <tran trig="TOUT" target="../../2">
-       <tran_glyph conn="26,28,1,3,12">
-        <action box="0,-2,10,2"/>
-       </tran_glyph>
-      </tran>
-      <state_glyph color="2" node="9,21,17,17">
-       <entry box="0,3,17,6"/>
-      </state_glyph>
-     </state>
-     <state_glyph node="6,13,98,52"/>
+    <state name="YtoG">
+     <entry>PRINT(&quot;YtoG&quot;);</entry>
+     <state_glyph color="3" node="39,20,16,17">
+      <entry box="0,3,6,2"/>
+     </state_glyph>
     </state>
-    <state_diagram size="125,75"/>
-   </statechart>
-  </class>
-  <class name="Led">
-   <operation name="ledOn" type="void" visibility="0x00" properties="0x00">
-    <parameter name="color" type="std::string"/>
-    <code>PRINT(color);</code>
-   </operation>
-  </class>
-  <class name="LedR" superclass="AOs::Led">
-   <attribute name="inst" type="LedR" visibility="0x00" properties="0x01"/>
-   <operation name="on" type="void" visibility="0x00" properties="0x00">
-    <code>ledOn(&quot;RR&quot;);</code>
-   </operation>
-  </class>
-  <class name="LedY" superclass="AOs::Led">
-   <attribute name="inst" type="LedY" visibility="0x00" properties="0x01"/>
-   <operation name="on" type="void" visibility="0x00" properties="0x00">
-    <code>ledOn(&quot;Y&quot;);</code>
-   </operation>
-  </class>
-  <class name="LedG" superclass="AOs::Led">
-   <attribute name="inst" type="LedG" visibility="0x00" properties="0x01"/>
-   <operation name="on" type="void" visibility="0x00" properties="0x00">
-    <code>ledOn(&quot;G&quot;);</code>
-   </operation>
-  </class>
-  <class name="Button" superclass="qpcpp::QActive">
-   <attribute name="pullTimeEvt" type="QP::QTimeEvt" visibility="0x00" properties="0x00">
-    <code>;</code>
-   </attribute>
-   <attribute name="inst" type="Button" visibility="0x00" properties="0x01"/>
-   <operation name="Button" type="" visibility="0x00" properties="0x00">
-    <code>: QActive(Q_STATE_CAST(&amp;Button::initial)),
- pullTimeEvt(this, TOUT_SIG, 0U)
-</code>
-   </operation>
-   <statechart properties="0x00">
-    <initial target="../1">
-     <action>PRINT(&quot;button init&quot;);
-APP::Button::inst.pullTimeEvt.armX(PULL_TIME,PULL_TIME);
-
-(void)e; // unused parameter</action>
-     <initial_glyph conn="34,7,5,0,4,7">
-      <action box="0,-2,10,2"/>
-     </initial_glyph>
-    </initial>
-    <state name="pulling">
-     <tran trig="TOUT">
-      <action>switch (QP::QF::consoleGetKey()) {
-
-  case ' ':
-   { 
-    PRINT(&quot;space&quot;);
-    static QP::QEvt evt(BUTTON_SIG);
-    APP::Traffic::inst.POST(&amp;evt,0);
-   }   
-break;
-  default:
-    break;
-};</action>
-      <tran_glyph conn="32,24,3,-1,-17">
-       <action box="-14,-2,10,2"/>
-      </tran_glyph>
-     </tran>
-     <state_glyph node="32,14,31,18"/>
+    <state name="G">
+     <entry>PRINT(&quot;G&quot;);</entry>
+     <state_glyph color="1" node="69,20,16,17">
+      <entry box="0,3,6,2"/>
+     </state_glyph>
     </state>
-    <state_diagram size="80,50"/>
+    <state name="YtoR">
+     <entry>PRINT(&quot;YtoR&quot;);</entry>
+     <state_glyph color="3" node="39,39,16,18">
+      <entry box="0,3,6,2"/>
+     </state_glyph>
+    </state>
+    <state name="R">
+     <entry>PRINT(&quot;Rojo&quot;);</entry>
+     <state_glyph color="2" node="10,20,17,17">
+      <entry box="0,3,14,5"/>
+     </state_glyph>
+    </state>
+    <state_diagram size="125,64"/>
    </statechart>
   </class>
  </package>
@@ -448,39 +320,14 @@ void QF::onCleanup  (void) {QF::consoleCleanup();}
 void QF::onClockTick(void) {QTimeEvt::TICK_X(0U, nullptr);}  // QTimeEvt clock tick processing
 } // namespace QP
 
-enum colorTimers : uint32_t {
-    COLOR_R_TIME = 500,
-    COLOR_Y_TIME = 200,
-    COLOR_G_TIME = 3000,
-    PRINT_TIME = 100,
-    PULL_TIME = 10,
-
-};
-
-enum AppSignals : uint32_t {
-  TOUT_SIG = QP::Q_USER_SIG,
-PRINT_SIG,
-BUTTON_SIG,
+enum AppSignals : std::uint32_t {
+   TOUT_SIG = QP::Q_USER_SIG,
 };
 
 #define PRINT(str) std::cout &lt;&lt; str &lt;&lt; std::endl;
-#define REARM(time) APP::Traffic::inst.colorTimeEvt.rearm(time);
-#define PRINT_CTR()  std::cout &lt;&lt; APP::Traffic::inst.colorTimeEvt.getCtr()/100 &lt;&lt; std::endl
 
-
-$declare ${AOs::Led}
-$declare ${AOs::LedR}
-$declare ${AOs::LedY}
-$declare ${AOs::LedG}
 $declare ${AOs::Traffic}
-$declare ${AOs::Button}
-
-$define ${AOs::Led}
-$define ${AOs::LedR}
-$define ${AOs::LedY}
-$define ${AOs::LedG}
 $define ${AOs::Traffic}
-$define ${AOs::Button}
 
 int main()
 {
@@ -492,14 +339,6 @@ int main()
         trafficQueueSto,             // event queue storage
         Q_DIM(trafficQueueSto),      // queue length [events]
         nullptr, 0U);                // no stack storage
-
-
-    QP::QEvt const *buttonQueueSto[10];
-    APP::Button::inst.start(
-        2U,                          // QP prio. of the AO
-        buttonQueueSto,             // event queue storage
-        Q_DIM(buttonQueueSto),      // queue length [events]
-        nullptr, 0U); 
 
     return QP::QF::run(); // run the QF application
 }</text>

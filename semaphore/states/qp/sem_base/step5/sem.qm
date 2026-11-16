@@ -132,7 +132,8 @@ if(APP::Traffic::inst.buttonPressed==1) {
 } else {
 REARM(COLOR_R_TIME);
 };</entry>
-      <exit>APP::Traffic::inst.ledR.off();</exit>
+      <exit>APP::Traffic::inst.ledR.off();
+APP::Traffic::inst.buttonPressed=0;</exit>
       <tran trig="TOUT" target="../../2">
        <tran_glyph conn="27,27,1,3,12">
         <action box="0,-2,10,2"/>

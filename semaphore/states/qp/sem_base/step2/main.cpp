@@ -191,7 +191,13 @@ Q_STATE_DEF(Traffic, R) {
     switch (e->sig) {
         //${AOs::Traffic::SM::R}
         case Q_ENTRY_SIG: {
-            PRINT("R");
+            PRINT("Rojo");
+            status_ = Q_RET_HANDLED;
+            break;
+        }
+        //${AOs::Traffic::SM::R}
+        case Q_EXIT_SIG: {
+            PRINT("RojoExit");
             status_ = Q_RET_HANDLED;
             break;
         }

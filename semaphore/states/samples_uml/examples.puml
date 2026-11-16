@@ -16,7 +16,8 @@ Este diagrama resume todas las propiedades, comportamientos y
 opciones de diseño que puedes aplicarle a un único estado.
 '/
 
-@startuml
+@startuml 
+'anotomia
 title Anatomía y Características de un Estado en PlantUML
 
 ' Configuración de estilo global (opcional)
@@ -66,7 +67,7 @@ state "Estado Completo" as EstadoCompleto <<mi_estereotipo>> #LightYellow {
     vuelve a apuntar al mismo estado SÍ provoca que se ejecuten 
     las acciones de 'exit' y luego las de 'entry'.
     '/
-    EstadoCompleto -right-> EstadoCompleto : eventoReinicio [contador > 5] / resetear()
+    EstadoCompleto -right-> EstadoCompleto : eventoReinicio \n[contador > 5] / resetear()
 
 /' 
     -------------------------------------------------------
@@ -88,7 +89,7 @@ NOTAS ASOCIADAS AL ESTADO
 Las notas se pueden anclar arriba (top), abajo (bottom), 
 izquierda (left) o derecha (right) de un estado.
 '/
-note left of EstadoCompleto
+note bottom of EstadoCompleto
   **Diferencia clave:**
   --
   * Una //transición interna// procesa 
@@ -114,7 +115,7 @@ Los pseudoestados no ejecutan acciones propias ni mantienen al
 sistema "dentro" de ellos; solo dirigen el flujo de las transiciones.
 '/
 
-@startuml
+@startuml pseudoestados
 title Guía Completa de Pseudoestados UML en PlantUML
 
 skinparam state {
@@ -196,7 +197,7 @@ end note
 
 /' 
 ====================================================================
-4. HISTORY (Historial Superficial y Profundo)
+4. HISTORY (Historial Superficia Profundo)
 ====================================================================
 - Permite recordar en qué sub-estado se quedó un estado compuesto 
   cuando fue interrumpido.
@@ -224,6 +225,43 @@ note right of Interrupcion
   (P1 o P2) donde fue interrumpido.
 end note
 
+@startuml history_deep
+title Diferencia de Comportamiento: [H] vs [H*]
+
+[*] --> MenuDePausa
+
+MenuDePausa --> JuegoEnProgreso[H] : reanudar_shallow
+note left on link
+  [H] Vuelve a Mundo_2 (1er nivel).
+  Pero dentro de Mundo_2, olvida el nivel
+  y arranca desde [*] (Nivel_2_1).
+end note
+
+MenuDePausa --> JuegoEnProgreso[H*] : reanudar_deep
+note right on link
+  [H*] Vuelve a Mundo_2 -> Nivel_2_2.
+  Recuerda exactamente el sub-estado
+  más interno donde estabas.
+end note
+
+JuegoEnProgreso --> MenuDePausa : presionar_pausa
+
+state JuegoEnProgreso {
+  [*] --> Mundo_1
+
+  state Mundo_1 {
+    [*] --> Nivel_1_1
+    Nivel_1_1 --> Nivel_1_2
+  }
+
+  Mundo_1 --> Mundo_2 : avanzar
+
+  state Mundo_2 {
+    [*] --> Nivel_2_1 : (Inicio por defecto)
+    Nivel_2_1 --> Nivel_2_2
+  }
+}
+@enduml
 
 /' 
 ====================================================================
@@ -258,7 +296,7 @@ end note
 
 
 
-@startuml
+@startuml history
 title Diferencia de Comportamiento: [H] vs [H*]
 
 skinparam stateBackgroundColor White
@@ -315,7 +353,7 @@ Demostración minimalista de cómo definir una máquina de estados
 una vez y reutilizarla varias veces.
 '/
 
-@startuml
+@startuml submaquina
 title Ejemplo Minimalista de Submáquina (Sumador)
 
 skinparam stateBackgroundColor White
@@ -372,7 +410,7 @@ Calculo_B --> [*] : Fin del programa
 
 @enduml
 
-@startuml
+@startuml sin_historia
 title 1. Comportamiento Simple (Sin historia)\nEjemplo: Calculadora de Impuestos
 
 skinparam ActivityBackgroundColor #D4EDDA
@@ -396,7 +434,7 @@ end note
 stop
 @enduml
 
-@startuml
+@startuml con_estados
 title 2. Comportamiento Dependiente de Estados (Historia discreta)\nEjemplo: Molinete de Metro
 
 skinparam StateBackgroundColor #FFF3CD
@@ -429,7 +467,7 @@ Bloqueado --> Bloqueado : empujar_barrera / sonar_alarma()
 
 
 
-@startuml
+@startuml continuo
 title 3. Comportamiento Continuo: ¿Dónde está la "Historia"?
 skinparam padding 5
 

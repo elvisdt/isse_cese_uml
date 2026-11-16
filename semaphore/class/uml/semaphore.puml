@@ -23,7 +23,7 @@
 
 @startuml semaphore1
 
-class App
+class Aopp
 
 @enduml
 
@@ -37,7 +37,7 @@ class App
 ' Decisión de diseño: cada color de LED es su propia clase concreta que
 ' hereda de una clase base abstracta Led.  Esto permite polimorfismo y
 ' facilita reemplazar un LED individual sin tocar los demás.
-
+' 
 @startuml semaphore2
 
 class App
@@ -71,15 +71,15 @@ class GreenLed
 '
 ' Usamos # en Led para que RedLed/YellowLed/GreenLed puedan acceder a pin_.
 
-@startuml semaphore
+@startuml semaphore3
 
 abstract class Led {
-    ' # protected: las subclases pueden leer/escribir pin_ directamente
-    # pin_   : uint8_t
-    # state_ : bool
+   ' # protected: las subclases pueden leer/escribir pin_ directamente
+   # pin_   : uint8_t
+   # state_ : bool
 }
 
-' Las subclases no agregan atributos nuevos: solo especializan el color
+'Las subclases no agregan atributos nuevos: solo especializan el color
 class RedLed
 class YellowLed
 class GreenLed
@@ -113,7 +113,6 @@ class Timer {
 }
 
 @enduml
-
 
 ' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ' PASO 4 — Métodos
@@ -274,12 +273,12 @@ abstract class Led
 class RedLed
 class YellowLed
 class GreenLed
-class Button
-class Traffic
 class Timer
 
 package "Application" {
 class App
+class Traffic
+class Button
 }
 
 note as LoopNote
@@ -334,30 +333,30 @@ end note
 ' Objetivo: presentación completa con skinparam, colores por estereotipo,
 ' packages y layout dirigido.
 '
-' skinparam classAttributeIconSize 0  → oculta los íconos +/-/# (más limpio)
-' skinparam class { BackgroundColor<<X>> }  → color por estereotipo
-'
+skinparam classAttributeIconSize 0  → oculta los íconos +/-/# (más limpio)
+skinparam class { BackgroundColor<<X>> }  → color por estereotipo
+
 ' Estereotipos usados:
 '   <<control>>   → lógica de negocio / máquina de estados
 '   <<hardware>>  → abstracción de dispositivo físico
 '   <<utility>>   → clase de servicio sin estado propio
 
-@startuml 
+@startuml
 'semaphore7
 
-'skinparam classAttributeIconSize 0
+skinparam classAttributeIconSize 0
 skinparam class {
-   BackgroundColor<<Application>>  Pink
-   BorderColor<<Application>>      Red
-   BackgroundColor<<control>>      LightSkyBlue
-   BorderColor<<control>>          SteelBlue
-   BackgroundColor<<hardware>>     LightGoldenRodYellow
-   BorderColor<<hardware>>         Goldenrod
-   BackgroundColor<<utility>>      HoneyDew
-   BorderColor<<utility>>          SeaGreen
-   BackgroundColor                 White
-   ArrowColor                      SlateGray
-   FontName                        Monospaced
+  BackgroundColor<<Application>>  Pink
+  BorderColor<<Application>>      Red
+  BackgroundColor<<control>>      LightSkyBlue
+  BorderColor<<control>>          SteelBlue
+  BackgroundColor<<hardware>>     LightGoldenRodYellow
+  BorderColor<<hardware>>         Goldenrod
+  BackgroundColor<<utility>>      HoneyDew
+  BorderColor<<utility>>          SeaGreen
+  BackgroundColor                 White
+  ArrowColor                      SlateGray
+  FontName                        Monospaced
 }
 
 package "Application" {
@@ -473,7 +472,7 @@ note right of Led
 end note
 
 note as LoopNote
-   Super-loop: 
+   Super-loop:
    1. button.update()
    2. traffic.update()
    (consulta isRequested())
@@ -482,3 +481,4 @@ end note
 App .. LoopNote
 
 @enduml
+

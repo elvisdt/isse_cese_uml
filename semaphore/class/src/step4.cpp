@@ -94,7 +94,7 @@ public:
 
     void init() { state_ = false; }
 
-    // Métodos abstractos: cada subclase sabe qué color imprimir
+    // Métodos abstractos: cada hijo sabe qué color imprimir
     virtual void on()  = 0;
     virtual void off() = 0;
 

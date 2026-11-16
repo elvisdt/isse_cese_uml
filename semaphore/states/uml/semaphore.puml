@@ -21,12 +21,12 @@ PALABRAS CLAVE DE PLANTUML:
 - [*]: Representa el pseudo-estado inicial (o final).
 - -->: Crea una transición (flecha) entre estados.
 '/
-@startuml
+@startuml 1
 title Paso 1: Estados Básicos
 
-[*] --> R
+[*] --> RR
 
-state R
+state RR
 state YtoG
 state G
 state YtoR
@@ -45,7 +45,7 @@ CONCEPTO UML:
 PALABRAS CLAVE DE PLANTUML:
 - : (dos puntos): Se usa después de una flecha para etiquetar la transición con el evento que la dispara.
 '/
-@startuml
+@startuml 2
 title Paso 2: Transiciones y Disparadores
 
 [*] --> R
@@ -70,7 +70,7 @@ PALABRAS CLAVE DE PLANTUML:
 - { } (llaves): Se usan para abrir un bloque de estado y definir sus detalles internos.
 - Formato de texto: Puedes escribir las acciones directamente dentro del bloque del estado como texto plano.
 '/
-@startuml
+@startuml 3
 title Paso 3: Acciones de Entrada y Salida
 
 [*] --> R
@@ -116,7 +116,7 @@ CONCEPTO UML:
 PALABRAS CLAVE DE PLANTUML:
 - state "Nombre" { ... }: Envolver estados existentes dentro del bloque de un estado padre crea automáticamente un estado compuesto.
 '/
-@startuml
+@startuml 4
 title Paso 4: Estado Compuesto (root)
 
 [*] --> root : / initial
@@ -160,7 +160,7 @@ CONCEPTO UML:
 PALABRAS CLAVE DE PLANTUML:
 - Simplemente conecta el nombre del estado padre (`root`) con el nuevo estado (`inactive`).
 '/
-@startuml
+@startuml 5
 title Paso 5: Transiciones de Alto Nivel
 
 state root {
@@ -196,14 +196,14 @@ CONCEPTO UML:
 PALABRAS CLAVE DE PLANTUML:
 - Se manejan de forma textual dentro de la definición del estado, igual que las acciones de entrada/salida.
 '/
-@startuml
+@startuml 6
 title Paso 6: Transiciones Internas (Reemplazando los "Cuadraditos")
 
 state root {
   [*] --> R
   
   ' Manejo de PRINT y BUTTON a alto nivel internamente
-  root : BUTTON / 
+  root : BUTTON /
   root : PRINT /
   
   state R {
@@ -248,7 +248,7 @@ PALABRAS CLAVE DE PLANTUML:
 - skinparam: Permite cambios de estilo globales (como cambiar el color de las flechas a rojo para que coincida con la imagen).
 - \n : Se utiliza para crear saltos de línea en cadenas de código C++ largas.
 '/
-@startuml
+@startuml 
 title Paso 7: Diagrama Final Completo del Semáforo
 
 ' Estilos para coincidir con la imagen original
